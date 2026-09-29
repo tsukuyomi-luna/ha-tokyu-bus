@@ -9,3 +9,6 @@
 - No Live Activity push has been sent; example only.
 - HA startup and setup/unload exercised on real HA. Failure injection and automated full HA framework tests remain outstanding.
 - Not validated: special-day schedules, automatic boarding detection, all routes, display-route aggregation, automatic route selection, phone delivery, long-duration operation.
+
+- HACS custom repository registration and main-branch download succeeded on the same HA; installed=true. Installed Python file SHA256 values match the published source.
+- GitHub CI passed. This is not a HACS default-store listing or approval.
