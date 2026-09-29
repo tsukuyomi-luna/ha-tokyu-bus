@@ -1,0 +1,11 @@
+type: entities
+title: バス
+entities:
+  - entity: sensor.tokyu_bus_test_scheduled_departure
+    name: 発車予定
+  - entity: sensor.tokyu_bus_test_arrival_estimate
+    name: 到着見込み
+  - entity: sensor.tokyu_bus_test_congestion
+    name: 混雑
+  - entity: sensor.tokyu_bus_test_next_stop
+    name: 次の停留所

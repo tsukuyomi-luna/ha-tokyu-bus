@@ -1,0 +1,20 @@
+# Paste as a script, replace sensor and notify action with your actual IDs.
+# Manual start only. No automatic push until you explicitly configure it.
+alias: バスの発車予定を表示
+mode: single
+sequence:
+  - condition: template
+    value_template: >-
+      {{ has_value('sensor.tokyu_bus_test_scheduled_departure') and
+         as_timestamp(states('sensor.tokyu_bus_test_scheduled_departure'), 0) > as_timestamp(now()) }}
+  - action: notify.mobile_app_YOUR_DEVICE
+    data:
+      title: バス・発車予定
+      message: 時刻表の予定時刻（到着予測ではありません）
+      data:
+        live_update: true
+        tag: tokyu_bus_schedule
+        chronometer: true
+        when: "{{ as_timestamp(states('sensor.tokyu_bus_test_scheduled_departure')) | int }}"
+        notification_icon: mdi:bus
+# End with message: clear_notification and data.tag: tokyu_bus_schedule

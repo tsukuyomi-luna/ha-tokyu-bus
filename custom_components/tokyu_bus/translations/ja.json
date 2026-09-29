@@ -1,0 +1,27 @@
+{
+  "title": "Tokyu Bus (Unofficial)",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Tokyu Bus",
+        "description": "非公式アプリAPIを利用します。乗り場・方向を確認してください。空の応答だけでは区間の正しさは保証できません。",
+        "data": {
+          "name": "名前",
+          "from_stop": "乗車停留所コード",
+          "to_stop": "降車停留所コード",
+          "route": "内部系統コード",
+          "pole": "乗り場番号",
+          "direction": "方向",
+          "poll_minutes": "更新間隔（分）"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "接続または応答の確認に失敗しました",
+      "invalid_codes": "コードと乗り場番号を確認してください"
+    },
+    "abort": {
+      "already_configured": "設定済みです"
+    }
+  }
+}
