@@ -15,6 +15,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 ("time_left", "Arrival estimate"),
                 ("congestion_level", "Congestion"),
                 ("next_stop", "Next stop"),
+                ("stops_remaining", "Stops remaining"),
                 ("scheduled_departure", "Scheduled departure"),
             ]
         ]
@@ -43,8 +44,8 @@ class BusSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def native_value(self):
-        if self.key == "scheduled_departure":
-            return self.coordinator.data.get("scheduled_departure")
+        if self.key in ("scheduled_departure", "stops_remaining"):
+            return self.coordinator.data.get(self.key)
         if self.key == "next_stop":
             stops = self.coordinator.data.get("stops") or []
             return next(

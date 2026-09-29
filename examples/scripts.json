@@ -146,7 +146,11 @@
       {
         "action": "script.turn_off",
         "target": {
-          "entity_id": ["script.tokyu_bus_live_start", "script.tokyu_bus_live_test"]
+          "entity_id": [
+            "script.tokyu_bus_live_start",
+            "script.tokyu_bus_live_test",
+            "script.tokyu_bus_live_morning"
+          ]
         }
       },
       {
@@ -164,6 +168,15 @@
           "message": "clear_notification",
           "data": {
             "tag": "tokyu_bus_display_test"
+          }
+        }
+      },
+      {
+        "action": "notify.mobile_app_YOUR_DEVICE",
+        "data": {
+          "message": "clear_notification",
+          "data": {
+            "tag": "tokyu_bus_morning"
           }
         }
       }
@@ -201,6 +214,98 @@
           "message": "clear_notification",
           "data": {
             "tag": "tokyu_bus_display_test"
+          }
+        }
+      }
+    ]
+  },
+  "tokyu_bus_live_morning": {
+    "alias": "朝の次のバス",
+    "mode": "single",
+    "sequence": [
+      {
+        "repeat": {
+          "while": [
+            {
+              "condition": "template",
+              "value_template": "{{ now().weekday() < 5 and today_at('08:00') <= now() < today_at('10:00') }}"
+            }
+          ],
+          "sequence": [
+            {
+              "variables": {
+                "departure": "{{ as_timestamp(states('sensor.tokyu_bus_test_scheduled_departure'),0) }}",
+                "previous": "{{ as_timestamp(state_attr('sensor.tokyu_bus_test_scheduled_departure','previous_departure'),0) }}"
+              }
+            },
+            {
+              "choose": [
+                {
+                  "conditions": [
+                    {
+                      "condition": "template",
+                      "value_template": "{{ departure | float > as_timestamp(now()) and departure | float < as_timestamp(today_at('10:00')) + 7200 and previous | float > 0 and previous | float < departure | float }}"
+                    }
+                  ],
+                  "sequence": [
+                    {
+                      "action": "notify.mobile_app_YOUR_DEVICE",
+                      "data": {
+                        "title": "バス · 発車予定",
+                        "message": "{{ '接近情報なし' if not has_value('sensor.tokyu_bus_test_arrival_estimate') or as_timestamp(now()) - as_timestamp(state_attr('sensor.tokyu_bus_test_arrival_estimate','retrieved_at'),0) > 120 else ('あと' ~ states('sensor.tokyu_bus_test_stops_remaining') ~ '停留所' if has_value('sensor.tokyu_bus_test_stops_remaining') else ('次は' ~ states('sensor.tokyu_bus_test_next_stop') if has_value('sensor.tokyu_bus_test_next_stop') else '位置不明')) }}",
+                        "data": {
+                          "live_update": true,
+                          "tag": "tokyu_bus_morning",
+                          "notification_icon": "mdi:bus",
+                          "url": "/tokyu-bus-test/bus",
+                          "alert_once": true,
+                          "critical_text": "{{ '接近情報なし' if not has_value('sensor.tokyu_bus_test_arrival_estimate') or as_timestamp(now()) - as_timestamp(state_attr('sensor.tokyu_bus_test_arrival_estimate','retrieved_at'),0) > 120 else ('あと' ~ states('sensor.tokyu_bus_test_stops_remaining') ~ '停留所' if has_value('sensor.tokyu_bus_test_stops_remaining') else ('次は' ~ states('sensor.tokyu_bus_test_next_stop') if has_value('sensor.tokyu_bus_test_next_stop') else '位置不明')) }}",
+                          "chronometer": true,
+                          "when": "{{ departure | int }}",
+                          "progress": "{{ [0, (departure | float - as_timestamp(now())) | int] | max }}",
+                          "progress_max": "{{ [(departure | float - previous | float) | int, 1] | max }}",
+                          "progress_bar_direction": "increasing"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "default": [
+                {
+                  "action": "notify.mobile_app_YOUR_DEVICE",
+                  "data": {
+                    "title": "バス · 発車予定",
+                    "message": "時刻表を確認できません",
+                    "data": {
+                      "live_update": true,
+                      "tag": "tokyu_bus_morning",
+                      "notification_icon": "mdi:bus",
+                      "url": "/tokyu-bus-test/bus",
+                      "alert_once": true,
+                      "critical_text": "{{ '接近情報なし' if not has_value('sensor.tokyu_bus_test_arrival_estimate') or as_timestamp(now()) - as_timestamp(state_attr('sensor.tokyu_bus_test_arrival_estimate','retrieved_at'),0) > 120 else ('あと' ~ states('sensor.tokyu_bus_test_stops_remaining') ~ '停留所' if has_value('sensor.tokyu_bus_test_stops_remaining') else ('次は' ~ states('sensor.tokyu_bus_test_next_stop') if has_value('sensor.tokyu_bus_test_next_stop') else '位置不明')) }}",
+                      "chronometer": false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "wait_template": "{{ as_timestamp(states('sensor.tokyu_bus_test_scheduled_departure'),0) != departure | float }}",
+              "timeout": {
+                "minutes": 2
+              },
+              "continue_on_timeout": true
+            }
+          ]
+        }
+      },
+      {
+        "action": "notify.mobile_app_YOUR_DEVICE",
+        "data": {
+          "message": "clear_notification",
+          "data": {
+            "tag": "tokyu_bus_morning"
           }
         }
       }

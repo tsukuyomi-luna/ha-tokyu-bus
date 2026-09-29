@@ -11,6 +11,7 @@ from homeassistant.util import dt as dt_util
 
 from .api import BusApi
 from .const import DOMAIN
+from .model import stops_remaining
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS = [Platform.SENSOR]
@@ -59,6 +60,8 @@ class BusCoordinator(DataUpdateCoordinator):
             "buses": buses,
             "stops": tracking,
             "scheduled_departure": scheduled,
+            "previous_departure": self.api.previous_departure if scheduled else None,
+            "stops_remaining": stops_remaining(tracking, self.api.config["from_stop"]),
             "poll_seconds": self.base_interval,
             "retrieved_at": dt_util.utcnow().isoformat(),
         }

@@ -21,3 +21,13 @@
 - Dedicated dashboard resource and card config saved/read back. Start/stop/test scripts registered through HA's config API.
 - Bounded 2-minute phone test started. API acceptance is not proof of iPhone display; owner confirmation is pending.
 - Normal Live Activity updates are separate from API polling, at most every 2 minutes on changes, with a 30-minute session limit.
+
+## 0.2.1 morning display
+
+- 29 Python tests, Ruff format/lint, oxfmt, ESLint and existing Chromium card checks pass.
+- Script templates accepted by live HA template renderer; script and automation configs accepted; `ha core check` passes.
+- HA restarted successfully; new `Stops remaining` sensor and previous timetable timestamp loaded. Both morning automations are enabled, morning script stays off outside its window.
+- 08:00–10:00 Monday–Friday (HA timezone; includes holidays). Script waits for next scheduled timestamp change or two-minute timeout; 10:00 automation ends it explicitly. Manual stop also stops morning script.
+- Explicit remaining-seconds / timetable-interval progress overrides automatic timer bar in current official iOS source. Timer is on-device; bar is a coarse snapshot. No claim of continuously animated interval bar.
+- Ambiguous duplicate future FROM stops remain unknown; nearest-next-stop text is fallback. Boarding stop itself counts as 1. Fixture tests cover repeated loop stops and missing stop orders.
+- Actual operating-bus stops count and an uninterrupted two-hour iPhone session remain unverified. Only configured internal route is tracked; other internal variants are not yet aggregated.

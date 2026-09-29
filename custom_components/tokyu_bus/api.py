@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 import aiohttp
 import jpholiday
 
-from .model import next_departure, normalize
+from .model import departure_window, normalize
 
 BASE_URL = "https://api.railway.dp.tokyu.co.jp/v2.1/"
 USER_AGENT = (
@@ -43,6 +43,7 @@ class BusApi:
         self.config = config
         self._now = now or (lambda: datetime.now(JAPAN_TIME))
         self._blocked_until: dict[str, float] = {}
+        self.previous_departure = None
         self._cache_date: date | None = None
         self._timetables: dict[str, list[dict[str, Any]]] = {}
 
@@ -123,4 +124,7 @@ class BusApi:
                     raise ValueError("Missing timetables list")
                 self._timetables[kind] = raw["timetables"]
             tables.append((service_day, self._timetables[kind]))
-        return next_departure(tables, now, self.config["route"])
+        self.previous_departure, departure = departure_window(
+            tables, now, self.config["route"]
+        )
+        return departure

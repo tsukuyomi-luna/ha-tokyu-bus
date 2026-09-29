@@ -49,7 +49,7 @@ def normalize(payload, route, pole, direction):
     return sorted(result, key=lambda row: row["time_left"])[:10]
 
 
-def next_departure(tables, now, route):
+def departure_window(tables, now, route):
     """Select future scheduled time, NOT a match to any tracked vehicle."""
     import re
     from datetime import datetime, time, timedelta
@@ -68,6 +68,39 @@ def next_departure(tables, now, route):
             stamp = datetime.combine(day, time(), tzinfo=now.tzinfo) + timedelta(
                 hours=hour, minutes=minute
             )
-            if stamp >= now:
-                candidates.append(stamp)
-    return min(candidates) if candidates else None
+            candidates.append(stamp)
+    future = [stamp for stamp in candidates if stamp > now]
+    past = [stamp for stamp in candidates if stamp <= now]
+    return (max(past) if past else None, min(future) if future else None)
+
+
+def next_departure(tables, now, route):
+    return departure_window(tables, now, route)[1]
+
+
+def stops_remaining(stops, boarding_code):
+    """Count through boarding; ambiguous loop occurrences stay unknown."""
+    if not isinstance(stops, list):
+        return None
+    next_indices = [i for i, row in enumerate(stops) if row.get("status") == "NEXT"]
+    if len(next_indices) != 1:
+        return None
+    start = next_indices[0]
+    targets = [
+        i
+        for i, row in enumerate(stops)
+        if i >= start
+        and str(row.get("stop", {}).get("code")) == str(boarding_code)
+        and row.get("type") == "FROM"
+        and row.get("status") in ("NEXT", "UNPASSED")
+    ]
+    if len(targets) != 1:
+        return None
+    end = targets[0]
+    segment = stops[start : end + 1]
+    orders = [row.get("stop_order") for row in segment]
+    if any(not isinstance(n, int) or isinstance(n, bool) for n in orders):
+        return None
+    if orders != list(range(orders[0], orders[0] + len(orders))):
+        return None
+    return len(segment)
