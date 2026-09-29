@@ -1,3 +1,150 @@
+const css = String.raw;
+const html = String.raw;
+const styles = css`
+  :host {
+    display: block;
+  }
+  ha-card {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--divider-color);
+    border-radius: 18px;
+    background: var(--ha-card-background, var(--card-background-color));
+    color: var(--primary-text-color);
+  }
+  .wrap {
+    padding: 22px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    background: var(--primary-color);
+    color: var(--text-primary-color, #fff);
+    padding: 6px 10px;
+    border-radius: 7px;
+    font-weight: 750;
+  }
+  .route {
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .muted {
+    color: var(--secondary-text-color);
+    font-size: 12px;
+  }
+  .timeblock {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 22px 0 18px;
+    flex-wrap: wrap;
+  }
+  .clock {
+    font-size: 44px;
+    letter-spacing: -1px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+  }
+  .count {
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--divider-color);
+    border-bottom: 1px solid var(--divider-color);
+    gap: 16px;
+    padding: 16px 0;
+  }
+  .value {
+    margin-top: 5px;
+    font-size: 18px;
+    overflow-wrap: anywhere;
+  }
+  .track {
+    margin: 18px 0;
+    padding: 0;
+    list-style: none;
+  }
+  .track li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 35px;
+    font-size: 14px;
+  }
+  .dot {
+    width: 9px;
+    height: 9px;
+    border: 2px solid var(--divider-color);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .next .dot {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+  .next {
+    font-weight: 750;
+  }
+  .passed {
+    color: var(--secondary-text-color);
+  }
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  button {
+    font: inherit;
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--divider-color);
+    color: var(--primary-text-color);
+    background: transparent;
+    cursor: pointer;
+  }
+  button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+  button:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .buttons {
+    display: flex;
+    gap: 6px;
+  }
+  .error {
+    color: var(--error-color);
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  @media (max-width: 350px) {
+    .wrap {
+      padding: 16px;
+    }
+    .clock {
+      font-size: 38px;
+    }
+    .value {
+      font-size: 16px;
+    }
+  }
+`;
+
 /* Original HA card. No external requests; provider data comes only from HA. */
 class TokyuBusCard extends HTMLElement {
   constructor() {
@@ -7,16 +154,45 @@ class TokyuBusCard extends HTMLElement {
   setConfig(c) {
     if (!c.entity || !c.schedule_entity) throw new Error("entity and schedule_entity are required");
     this.config = c;
-    this.shadowRoot.innerHTML = `<style>
-      :host{display:block}ha-card{overflow:hidden;border:1px solid var(--divider-color);border-radius:18px;background:var(--ha-card-background,var(--card-background-color));color:var(--primary-text-color)}
-      .wrap{padding:22px}header{display:flex;align-items:center;gap:10px}.badge{background:var(--primary-color);color:var(--text-primary-color,#fff);padding:6px 10px;border-radius:7px;font-weight:750}.route{font-size:14px;line-height:1.6;overflow-wrap:anywhere}.muted{color:var(--secondary-text-color);font-size:12px}.timeblock{display:flex;align-items:baseline;gap:12px;margin:22px 0 18px;flex-wrap:wrap}.clock{font-size:44px;letter-spacing:-1px;font-weight:750;font-variant-numeric:tabular-nums}.count{font-size:17px;font-variant-numeric:tabular-nums}.grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--divider-color);border-bottom:1px solid var(--divider-color);gap:16px;padding:16px 0}.value{margin-top:5px;font-size:18px;overflow-wrap:anywhere}.track{margin:18px 0;padding:0;list-style:none}.track li{display:flex;align-items:center;gap:12px;min-height:35px;font-size:14px}.dot{width:9px;height:9px;border:2px solid var(--divider-color);border-radius:50%;flex-shrink:0}.next .dot{background:var(--primary-color);border-color:var(--primary-color)}.next{font-weight:750}.passed{color:var(--secondary-text-color)}footer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}button{font:inherit;font-size:13px;padding:10px 12px;border-radius:8px;border:1px solid var(--divider-color);color:var(--primary-text-color);background:transparent;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}button:disabled{opacity:.45;cursor:default}.buttons{display:flex;gap:6px}.error{color:var(--error-color);font-size:13px;margin-top:8px}[hidden]{display:none!important}@media(max-width:350px){.wrap{padding:16px}.clock{font-size:38px}.value{font-size:16px}}
-    </style><ha-card><div class="wrap">
-      <header><span class="badge"></span><div class="route"></div></header>
-      <div class="timeblock"><div><div class="muted">発車予定 · 時刻表</div><span class="clock">—</span></div><span class="count"></span></div>
-      <div class="grid"><div><div class="muted">実車の到着見込み</div><div class="value arrival">—</div></div><div><div class="muted">混雑</div><div class="value crowd">—</div></div></div>
-      <ol class="track" aria-label="バスの通過状況"></ol><p class="empty muted"></p>
-      <footer><span class="updated muted"></span><div class="buttons"><button class="start" aria-label="スマホのライブアクティビティを開始">スマホに表示</button><button class="test" aria-label="2分間のライブアクティビティ表示テスト">表示テスト</button><button class="stop" aria-label="ライブアクティビティを終了">終了</button></div></footer><div class="error" role="status"></div>
-    </div></ha-card>`;
+    this.shadowRoot.innerHTML = html`<style>
+        ${styles}</style
+      ><ha-card
+        ><div class="wrap">
+          <header>
+            <span class="badge"></span>
+            <div class="route"></div>
+          </header>
+          <div class="timeblock">
+            <div>
+              <div class="muted">発車予定 · 時刻表</div>
+              <span class="clock">—</span>
+            </div>
+            <span class="count"></span>
+          </div>
+          <div class="grid">
+            <div>
+              <div class="muted">実車の到着見込み</div>
+              <div class="value arrival">—</div>
+            </div>
+            <div>
+              <div class="muted">混雑</div>
+              <div class="value crowd">—</div>
+            </div>
+          </div>
+          <ol class="track" aria-label="バスの通過状況"></ol>
+          <p class="empty muted"></p>
+          <footer>
+            <span class="updated muted"></span>
+            <div class="buttons">
+              <button class="start" aria-label="スマホのライブアクティビティを開始">
+                スマホに表示</button
+              ><button class="test" aria-label="2分間のライブアクティビティ表示テスト">
+                表示テスト</button
+              ><button class="stop" aria-label="ライブアクティビティを終了">終了</button>
+            </div>
+          </footer>
+          <div class="error" role="status"></div></div
+      ></ha-card>`;
     this.q(".badge").textContent = c.route || "バス";
     this.q(".route").textContent = c.title || "バス接近情報";
     this.q(".test").hidden = !c.test_script;
