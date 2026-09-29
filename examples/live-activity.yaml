@@ -5,8 +5,8 @@ mode: single
 sequence:
   - condition: template
     value_template: >-
-      {{ has_value('sensor.tokyu_bus_test_scheduled_departure') and
-         as_timestamp(states('sensor.tokyu_bus_test_scheduled_departure'), 0) > as_timestamp(now()) }}
+      {{ has_value('sensor.tokyu_bus_outbound_scheduled_departure') and
+         as_timestamp(states('sensor.tokyu_bus_outbound_scheduled_departure'), 0) > as_timestamp(now()) }}
   - action: notify.mobile_app_YOUR_DEVICE
     data:
       title: バス・発車予定
@@ -15,6 +15,6 @@ sequence:
         live_update: true
         tag: tokyu_bus_schedule
         chronometer: true
-        when: "{{ as_timestamp(states('sensor.tokyu_bus_test_scheduled_departure')) | int }}"
+        when: "{{ as_timestamp(states('sensor.tokyu_bus_outbound_scheduled_departure')) | int }}"
         notification_icon: mdi:bus
 # End with message: clear_notification and data.tag: tokyu_bus_schedule

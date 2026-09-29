@@ -35,7 +35,7 @@ class BusSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry.entry_id)},
             "name": entry.title,
-            "manufacturer": "Unofficial",
+            "manufacturer": "Community",
         }
         if key == "scheduled_departure":
             self._attr_device_class = SensorDeviceClass.TIMESTAMP

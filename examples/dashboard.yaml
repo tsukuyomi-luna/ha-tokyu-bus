@@ -1,5 +1,5 @@
 type: custom:tokyu-bus-card
-entity: sensor.tokyu_bus_test_arrival_estimate
-schedule_entity: sensor.tokyu_bus_test_scheduled_departure
+entity: sensor.tokyu_bus_outbound_arrival_estimate
+schedule_entity: sensor.tokyu_bus_outbound_scheduled_departure
 title: 乗車停留所 → 降車停留所
 route: 系統名

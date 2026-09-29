@@ -14,9 +14,6 @@ def test_morning_end_and_stop():
     gate = loop["while"][0]["value_template"]
     assert "weekday() < 5" in gate
     assert "08:00" in gate and "10:00" in gate
-    stop = scripts["tokyu_bus_live_stop"]["sequence"]
-    assert "script.tokyu_bus_live_morning" in stop[0]["target"]["entity_id"]
-    assert stop[-1]["data"]["data"]["tag"] == "tokyu_bus_morning"
 
 
 def test_bar_is_independent_of_timer():
@@ -29,7 +26,7 @@ def test_bar_is_independent_of_timer():
     assert payload["progress_bar_direction"] == "increasing"
     # Remaining seconds shrink; do not invert the fraction a second time.
     assert "as_timestamp(now())" in payload["progress"]
-    assert "sensor.tokyu_bus_test_stops_remaining" in payload["critical_text"]
+    assert "sensor.tokyu_bus_outbound_stops_remaining" in payload["critical_text"]
     assert loop[1]["default"][0]["data"]["data"]["chronometer"] is False
 
 

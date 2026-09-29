@@ -1,6 +1,6 @@
 {
   "domain": "tokyu_bus",
-  "name": "Tokyu Bus (Unofficial)",
+  "name": "Tokyu Bus",
   "version": "0.2.1",
   "config_flow": true,
   "integration_type": "service",

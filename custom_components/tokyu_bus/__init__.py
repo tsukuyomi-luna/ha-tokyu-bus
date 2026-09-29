@@ -1,4 +1,4 @@
-"""Unofficial Tokyu Bus integration."""
+"""Tokyu Bus integration."""
 
 import logging
 from datetime import timedelta
