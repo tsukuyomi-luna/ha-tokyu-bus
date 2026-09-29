@@ -51,3 +51,22 @@ HACS → カスタムリポジトリへ `https://github.com/tsukuyomi-luna/ha-to
 解析したAPK、逆コンパイルコード、認証情報、個人の通勤設定は同梱していません。
 
 参考: [HACS](https://www.hacs.xyz/docs/publish/integration/), [HA coordinator](https://developers.home-assistant.io/docs/integration_fetching_data/), [Live Activities](https://companion.home-assistant.io/docs/notifications/live-activities/)
+
+### 品質チェック
+
+Python 3.14 / uv 0.12.19 / Node.js 24 を使用します。
+
+```sh
+uv sync --locked --group dev
+npm ci --ignore-scripts
+uv run ruff format .
+uv run ruff check .
+npm run format
+uv run pytest
+```
+
+CIでは `ruff format --check`、`ruff check`、`prettier --check`、pytestを実行。
+Python依存は `uv.lock`、整形ツールは `package-lock.json` で固定します。
+GitHub Actionsは現行リリースの完全なコミットSHAへ固定し、バージョン名をコメントで併記。
+更新はDependabotのPRで確認します（Actionsとnpm）。Python依存更新は `uv lock --upgrade` 後に同じチェックを実行します。
+APIテストはHAを起動しない単体テストで、HAフレームワーク全体の検証とは別です。

@@ -1,6 +1,7 @@
-__pycache__/
-*.pyc
 .venv/
+.git/
 node_modules/
+uv.lock
+__pycache__/
 .pytest_cache/
 .ruff_cache/

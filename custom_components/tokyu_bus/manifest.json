@@ -5,12 +5,8 @@
   "config_flow": true,
   "integration_type": "service",
   "iot_class": "cloud_polling",
-  "requirements": [
-    "jpholiday==1.0.3"
-  ],
-  "codeowners": [
-    "@tsukuyomi-luna"
-  ],
+  "requirements": ["jpholiday==1.0.3"],
+  "codeowners": ["@tsukuyomi-luna"],
   "documentation": "https://github.com/tsukuyomi-luna/ha-tokyu-bus",
   "issue_tracker": "https://github.com/tsukuyomi-luna/ha-tokyu-bus/issues"
 }

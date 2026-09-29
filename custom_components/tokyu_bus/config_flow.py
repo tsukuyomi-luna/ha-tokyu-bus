@@ -1,35 +1,56 @@
 """Advanced initial setup using explicitly selected route and boarding pole."""
-import asyncio
+
 import re
+
 import aiohttp
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from .const import DOMAIN
+
 from .api import BusApi
-SCHEMA = vol.Schema({vol.Required('name', default='Tokyu Bus'): str,
-    vol.Required('from_stop'): str,
-    vol.Required('to_stop'): str,
-    vol.Required('route'): str,
-    vol.Required('pole'): str,
-    vol.Required('direction'): vol.In(['UP', 'DOWN']),
-    vol.Required('poll_minutes', default=5): vol.All(vol.Coerce(int), vol.Range(min=2, max=60))})
+from .const import DOMAIN
+
+SCHEMA = vol.Schema(
+    {
+        vol.Required("name", default="Tokyu Bus"): str,
+        vol.Required("from_stop"): str,
+        vol.Required("to_stop"): str,
+        vol.Required("route"): str,
+        vol.Required("pole"): str,
+        vol.Required("direction"): vol.In(["UP", "DOWN"]),
+        vol.Required("poll_minutes", default=5): vol.All(
+            vol.Coerce(int), vol.Range(min=2, max=60)
+        ),
+    }
+)
+
+
 class TokyuFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
+
     async def async_step_user(self, user_input=None):
         errors = {}
         if user_input is not None:
-            if (any(not re.fullmatch(r'[0-9]+', user_input[k]) for k in ('from_stop','to_stop','route'))
-                or not re.fullmatch(r'[A-Za-z0-9]+', user_input['pole'])):
-                return self.async_show_form(step_id='user', data_schema=SCHEMA,
-                                            errors={'base': 'invalid_codes'})
-            await self.async_set_unique_id(':'.join(user_input[k] for k in
-                ('from_stop', 'to_stop', 'route', 'pole', 'direction')))
+            if any(
+                not re.fullmatch(r"[0-9]+", user_input[k])
+                for k in ("from_stop", "to_stop", "route")
+            ) or not re.fullmatch(r"[A-Za-z0-9]+", user_input["pole"]):
+                return self.async_show_form(
+                    step_id="user", data_schema=SCHEMA, errors={"base": "invalid_codes"}
+                )
+            await self.async_set_unique_id(
+                ":".join(
+                    user_input[k]
+                    for k in ("from_stop", "to_stop", "route", "pole", "direction")
+                )
+            )
             self._abort_if_unique_id_configured()
             try:
                 await BusApi(async_get_clientsession(self.hass), user_input).running()
-            except (aiohttp.ClientError, asyncio.TimeoutError, ValueError):
-                errors['base'] = 'cannot_connect'
+            except TimeoutError, aiohttp.ClientError, ValueError:
+                errors["base"] = "cannot_connect"
             else:
-                return self.async_create_entry(title=user_input['name'], data=user_input)
-        return self.async_show_form(step_id='user', data_schema=SCHEMA, errors=errors)
+                return self.async_create_entry(
+                    title=user_input["name"], data=user_input
+                )
+        return self.async_show_form(step_id="user", data_schema=SCHEMA, errors=errors)
