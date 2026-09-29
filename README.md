@@ -1,72 +1,31 @@
-# Tokyu Bus for Home Assistant (unofficial prototype)
+# Tokyu Bus for Home Assistant
 
-東急バスの接近情報を Home Assistant に表示する実験的カスタム連携。
-東急の公式・公認連携ではありません。アプリ用の非公開仕様のAPIに依存し、変更で動作しなくなる場合があります。
+東急バスの発車予定・接近情報・混雑を表示する非公式の実験的連携です。
 
-## 状態
+## インストール
 
-実験版。HA 2026.9.3で設定フロー・センサー4個・再読込を確認済み。
-HACSの標準一覧への掲載申請とは別です。
+1. HACSのカスタムリポジトリへ `https://github.com/tsukuyomi-luna/ha-tokyu-bus` を種類 **Integration** で追加
+2. ダウンロードしてHome Assistantを再起動
+3. 「統合を追加」から **Tokyu Bus (Unofficial)** を選択
 
-## センサー
-
-- Arrival estimate: APIの到着見込み（分）。時刻表との差ではありません。
-- Congestion: LOW / NORMAL / HIGH / UNCLEAR / UNKNOWN。未知を空いていると扱いません。
-- Next stop: 同じ便・周回の追跡結果で NEXT の停留所。
-- Scheduled departure: 指定した内部系統の次の予定発車時刻（Asia/Tokyo）。追跡車両と同一便だとは扱いません。
-
-`buses` 属性に最大10件、`stops` に順番付き追跡停留所を格納します。車両のGPS座標ではありません。
-`retrieved_at` は取得時刻で、事業者の観測時刻ではありません。
-API失敗時は接近センサーを unavailable にします。運行データが空なら unknown で、運休とは断定しません。
-
-## HACS（カスタムリポジトリ）
-
-HACS → カスタムリポジトリへ `https://github.com/tsukuyomi-luna/ha-tokyu-bus` を種類「Integration」で追加しダウンロード。HAを再起動後、統合を追加してください。
-
-## 手動導入
-
-`custom_components/tokyu_bus` をHAのconfig/custom_componentsへ配置して再起動。
-設定 → デバイスとサービス → 統合を追加 → Tokyu Bus。
-
-現在の設定画面は上級者向けのコード入力です。乗車・降車停留所、内部系統コード、乗り場、UP/DOWNを指定。
-表示系統番号（表示名）と内部コードは別。空の応答で接続成功しても区間の妥当性は保証しません。
-名前検索UI、options/reconfigureは未実装です。変更時はエントリを削除し再登録してください。
-
-更新は既定5分、最短2分。全センサーで接近取得を共有、先頭便だけ追跡。時刻表は日付・曜日種別でキャッシュ。
-この間隔は提供元が公認するレートではありません。大量登録・短時間の更新連打はしないでください。
-
-時刻表は日本の通常平日・土曜・日曜祝日を判定。臨時ダイヤや年末年始・お盆の特別運用は未対応。
-同じ表示系統にも複数内部コードがあり、指定コード以外の便は含みません。全便と誤解しないでください。
+現時点では乗車・降車停留所のコード、内部系統コード、乗り場、方向の入力が必要です。
+表示上の系統番号（表示名）では設定できません。設定変更は削除・再登録で行います。
 
 ## 表示
 
-`examples/dashboard.yaml` をカードのYAMLへ貼り、実際のentity_idに置換。
-`examples/live-activity.yaml` は手動実行するscriptの例です。iPhoneへの自動送信は勝手に有効化しません。
-時刻表のカウントダウンと実車接近は別情報です。iOSではタイマーが本文を置き換えるため、混雑・位置との同時表示は実機調整が必要です。
+発車予定、到着見込み、混雑、次の停留所の4センサーを作成します。
+通常のカードのほか、発車カウントダウン・接近位置を表示する専用カードを同梱しています。
+`www/tokyu-bus-card.js` をHAの `config/www/` へ置き、JavaScriptモジュール `/local/tokyu-bus-card.js` をダッシュボードのリソースへ追加してください。
+[設定例とスマホ表示](examples/)を参照してください。
 
-## 開発
+更新間隔は既定30秒で、統合のオプションから変更できます。通信エラーや429応答では間隔を延ばします。
 
-`python3 -m unittest discover -s tests -v`
+## 制限
 
-解析したAPK、逆コンパイルコード、認証情報、個人の通勤設定は同梱していません。
+- アプリ用の非公開仕様APIに依存します。東急の公式・公認連携ではなく、予告なく動かなくなる可能性があります。
+- 発車予定は時刻表、到着見込みはリアルタイム情報です。同一便と確認できたデータではありません。
+- 指定した内部系統のみが対象で、同じ表示系統の全便を含むとは限りません。
+- 車両のGPS座標、臨時・年末年始などの特別ダイヤには対応していません。
+- 情報なしを運休・混雑なしと判断しません。
 
-参考: [HACS](https://www.hacs.xyz/docs/publish/integration/), [HA coordinator](https://developers.home-assistant.io/docs/integration_fetching_data/), [Live Activities](https://companion.home-assistant.io/docs/notifications/live-activities/)
-
-### 品質チェック
-
-Python 3.14 / uv 0.12.19 / Node.js 24 を使用します。
-
-```sh
-uv sync --locked --group dev
-npm ci --ignore-scripts
-uv run ruff format .
-uv run ruff check .
-npm run format
-uv run pytest
-```
-
-CIでは `ruff format --check`、`ruff check`、`prettier --check`、pytestを実行。
-Python依存は `uv.lock`、整形ツールは `package-lock.json` で固定します。
-GitHub Actionsは現行リリースの完全なコミットSHAへ固定し、バージョン名をコメントで併記。
-更新はDependabotのPRで確認します（Actionsとnpm）。Python依存更新は `uv lock --upgrade` 後に同じチェックを実行します。
-APIテストはHAを起動しない単体テストで、HAフレームワーク全体の検証とは別です。
+[開発](CONTRIBUTING.md) · [検証範囲](VALIDATION.md)

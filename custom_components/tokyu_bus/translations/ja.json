@@ -12,7 +12,7 @@
           "route": "内部系統コード",
           "pole": "乗り場番号",
           "direction": "方向",
-          "poll_minutes": "更新間隔（分）"
+          "poll_seconds": "更新間隔（秒）"
         }
       }
     },
@@ -22,6 +22,16 @@
     },
     "abort": {
       "already_configured": "設定済みです"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "更新間隔",
+        "data": {
+          "poll_seconds": "更新間隔（秒）"
+        }
+      }
     }
   }
 }

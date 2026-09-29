@@ -118,3 +118,18 @@ async def test_bad_timetable_not_cached(api_module):
 )
 def test_regular_calendar(api_module, day, expected):
     assert api_module.timetable_kind(day) == expected
+
+
+async def test_rate_limit_backs_off_without_more_http(api_module):
+    import aiohttp
+
+    error = aiohttp.ClientResponseError(
+        None, (), status=429, headers={"Retry-After": "600"}
+    )
+    session = Session(Response({}, error))
+    client = api_module.BusApi(session, CONFIG)
+    with pytest.raises(aiohttp.ClientResponseError):
+        await client.running()
+    with pytest.raises(ValueError, match="backed off"):
+        await client.running()
+    assert len(session.calls) == 1

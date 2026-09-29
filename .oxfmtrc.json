@@ -1,0 +1,10 @@
+{
+  "ignorePatterns": [
+    ".venv/**",
+    "node_modules/**",
+    "uv.lock",
+    "pnpm-lock.yaml",
+    ".pytest_cache/**",
+    ".ruff_cache/**"
+  ]
+}

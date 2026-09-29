@@ -1,11 +1,19 @@
 {
   "name": "ha-tokyu-bus-quality",
   "private": true,
+  "type": "module",
   "scripts": {
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "lint": "eslint .",
+    "test:card": "node tests/card.cjs"
   },
   "devDependencies": {
-    "prettier": "3.9.9"
-  }
+    "@eslint/js": "10.0.1",
+    "eslint": "10.11.0",
+    "globals": "17.12.0",
+    "oxfmt": "0.70.0",
+    "playwright": "1.63.0"
+  },
+  "packageManager": "pnpm@12.5.1"
 }

@@ -3,6 +3,7 @@
 import asyncio
 from collections.abc import Callable, Mapping
 from datetime import date, datetime, timedelta
+from time import monotonic
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -41,6 +42,7 @@ class BusApi:
         self.session = session
         self.config = config
         self._now = now or (lambda: datetime.now(JAPAN_TIME))
+        self._blocked_until: dict[str, float] = {}
         self._cache_date: date | None = None
         self._timetables: dict[str, list[dict[str, Any]]] = {}
 
@@ -53,13 +55,22 @@ class BusApi:
 
     async def get(self, path: str, params: Mapping[str, Any]) -> dict[str, Any]:
         """Perform one GET without retrying authentication or HTTP failures."""
+        if monotonic() < self._blocked_until.get(path, 0):
+            raise ValueError("Endpoint temporarily backed off after HTTP failure")
         async with asyncio.timeout(REQUEST_TIMEOUT_SECONDS):
             async with self.session.get(
                 BASE_URL + path,
                 params=params,
                 headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
             ) as response:
-                response.raise_for_status()
+                try:
+                    response.raise_for_status()
+                except aiohttp.ClientResponseError as err:
+                    if err.status in (401, 403, 429) or err.status >= 500:
+                        retry = (err.headers or {}).get("Retry-After", "")
+                        seconds = max(300, int(retry)) if retry.isdigit() else 300
+                        self._blocked_until[path] = monotonic() + seconds
+                    raise
                 data = await response.json()
                 if not isinstance(data, dict):
                     raise ValueError("Invalid response object")

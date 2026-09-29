@@ -17,7 +17,7 @@ def test_ci_checks_format_lint_and_tests():
         "ruff format --check",
         "ruff check",
         "pytest",
-        "npm ci",
+        "pnpm install --frozen-lockfile",
         "format:check",
     ):
         assert command in workflow

@@ -1,11 +1,8 @@
-type: entities
-title: バス
-entities:
-  - entity: sensor.tokyu_bus_test_scheduled_departure
-    name: 発車予定
-  - entity: sensor.tokyu_bus_test_arrival_estimate
-    name: 到着見込み
-  - entity: sensor.tokyu_bus_test_congestion
-    name: 混雑
-  - entity: sensor.tokyu_bus_test_next_stop
-    name: 次の停留所
+type: custom:tokyu-bus-card
+entity: sensor.tokyu_bus_test_arrival_estimate
+schedule_entity: sensor.tokyu_bus_test_scheduled_departure
+title: 乗車停留所 → 降車停留所
+route: 系統名
+start_script: script.tokyu_bus_live_start
+stop_script: script.tokyu_bus_live_stop
+test_script: script.tokyu_bus_live_test
